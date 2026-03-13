@@ -38,7 +38,8 @@ export function MathRenderer({ text, className = "" }: Props) {
           } catch {
             return `<span class="text-red-500">(LaTeX error)</span>`;
           }
-        });
+        })
+        .replace(/\n/g, "<br />");
     } catch {
       return text;
     }

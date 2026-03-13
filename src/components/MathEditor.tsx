@@ -4,6 +4,7 @@ import { useState } from "react";
 import { MathRenderer } from "./MathRenderer";
 
 const SNIPPETS = [
+  { label: "↵ New line", insert: "\n", raw: true },
   { label: "Fraction", insert: "\\frac{a}{b}" },
   { label: "x²", insert: "x^2" },
   { label: "√x", insert: "\\sqrt{x}" },
@@ -37,20 +38,21 @@ export function MathEditor({ value = "", onChange, placeholder = "Type your math
     onChange?.(v);
   };
 
-  const insertSnippet = (snippet: string) => {
+  const insertSnippet = (snippet: string, raw = false) => {
     const textarea = document.getElementById("math-editor-textarea") as HTMLTextAreaElement;
     if (!textarea) return;
     const start = textarea.selectionStart;
     const end = textarea.selectionEnd;
     const before = latex.slice(0, start);
     const after = latex.slice(end);
-    const wrapped = `\\( ${snippet} \\)`;
-    const next = before + wrapped + after;
+    const toInsert = raw ? snippet : `\\( ${snippet} \\)`;
+    const next = before + toInsert + after;
     if (!isControlled) setInternalValue(next);
     onChange?.(next);
     setTimeout(() => {
       textarea.focus();
-      textarea.setSelectionRange(start + 3, start + 3 + snippet.length);
+      const newPos = start + toInsert.length;
+      textarea.setSelectionRange(newPos, newPos);
     }, 0);
   };
 
@@ -62,7 +64,7 @@ export function MathEditor({ value = "", onChange, placeholder = "Type your math
           <button
             key={s.label}
             type="button"
-            onClick={() => insertSnippet(s.insert)}
+            onClick={() => insertSnippet(s.insert, "raw" in s && s.raw)}
             className="rounded border border-zinc-300 px-2 py-1 text-sm hover:bg-zinc-100 dark:border-zinc-600 dark:hover:bg-zinc-800"
           >
             {s.label}
